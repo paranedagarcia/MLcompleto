@@ -346,9 +346,6 @@ with tab3:
         config={"displayModeBar": False}
     )
 
-
-    
-
 with tab4:
     st.subheader("💡 Insights Clave del Análisis")
     
