@@ -1,21 +1,24 @@
-# streamlit_app/pages/02_🎯_Predictor.py
 import streamlit as st
 import pandas as pd
-import sys
 import os
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.colors import TITULO, POSITIVO, NEGATIVO
 from utils.charts import create_gauge_chart
+from utils.load_data import load_data  # ← función genérica que creamos
 
 st.set_page_config(page_title="Predictor - Telco", page_icon="🎯", layout="wide")
 
-st.title("🎯 Predictor de Churn Individual")
+st.title("🎯 Predictor de baja de cliente")
 st.markdown("Predice la probabilidad de que un cliente abandone el servicio")
+st.info("ℹ️ **Modelo ML utilizado**: XGBOOST")
 
-st.info("ℹ️ **Modelo en desarrollo**: Esta versión usa reglas heurísticas. Próximamente se integrará modelo ML.")
+# =========================
+# 1️⃣ Cargar modelo
+# =========================
+model = load_data("../models/xgboost_model.pkl")  # ⚡ usa nuestra función genérica para cualquier archivo pkl
 
-# Formulario de entrada
+# =========================
+# 2️⃣ Formulario de entrada
+# =========================
 with st.form("prediction_form"):
     col1, col2, col3 = st.columns(3)
     
@@ -42,36 +45,37 @@ with st.form("prediction_form"):
     
     submitted = st.form_submit_button("🔮 Predecir Probabilidad de Churn", type="primary")
 
+# =========================
+# 3️⃣ Predicción con ML
+# =========================
 if submitted:
-    # Modelo heurístico simple (reemplazar con ML real)
-    churn_prob = 0.26  # Base rate
-    
-    # Ajustes según reglas de negocio
-    if contract == "Month-to-month":
-        churn_prob += 0.20
-    elif contract == "Two year":
-        churn_prob -= 0.20
-    
-    if tenure < 12:
-        churn_prob += 0.15
-    elif tenure > 24:
-        churn_prob -= 0.15
-    
-    if multiple_lines == "Yes":
-        churn_prob -= 0.08
-    
-    if tech_support == "Yes":
-        churn_prob -= 0.10
-    
-    if payment_method == "Electronic check":
-        churn_prob += 0.10
-    
-    if senior_citizen == "Yes":
-        churn_prob += 0.05
-    
-    # Limitar entre 0 y 1
-    churn_prob = max(0, min(1, churn_prob))
-    
+    # Crear DataFrame con la misma estructura que usó el modelo
+    input_df = pd.DataFrame([{
+        "tenure": tenure,
+        "monthlycharges": monthly_charges,
+        "seniorcitizen": 1 if senior_citizen == "Yes" else 0,
+        "contract": contract,
+        "internetservice": internet_service,
+        "multiplelines": multiple_lines,
+        "paymentmethod": payment_method,
+        "techsupport": tech_support,
+        "streamingtv": streaming_tv
+    }])
+
+    # ⚠️ IMPORTANTE: Aplicar exactamente el mismo preprocesamiento que el entrenamiento
+    # Si el modelo fue entrenado con OneHotEncoder:
+    input_encoded = pd.get_dummies(input_df)
+
+    # Asegurarse de que las columnas coincidan con las del modelo
+    model_cols = model.get_booster().feature_names
+    input_encoded = input_encoded.reindex(columns=model_cols, fill_value=0)
+
+    # Obtener probabilidad de churn
+    churn_prob = model.predict_proba(input_encoded)[0][1]
+
+    # =========================
+    # 4️⃣ Visualización del resultado
+    # =========================
     st.markdown("---")
     st.subheader("📊 Resultado de la Predicción")
     
@@ -83,7 +87,6 @@ if submitted:
     
     with col2:
         st.markdown("### 📈 Interpretación")
-        
         if churn_prob > 0.7:
             st.error("🔴 **RIESGO MUY ALTO**")
             risk_level = "crítico"
@@ -100,26 +103,24 @@ if submitted:
         st.metric("Probabilidad de Churn", f"{churn_prob*100:.1f}%")
         st.metric("Nivel de Riesgo", risk_level.upper())
     
-    # Recomendaciones
+    # =========================
+    # 5️⃣ Recomendaciones
+    # =========================
     st.markdown("---")
     st.subheader("💡 Acciones Recomendadas")
     
     if churn_prob > 0.5:
         st.markdown("""
         ### ⚠️ Plan de Retención de Alta Prioridad
-        
         1. **🎁 Oferta Especial Inmediata**
            - Descuento del 25% en upgrade a contrato anual
            - 3 meses gratis de Streaming Premium
-        
         2. **📞 Contacto Personal**
            - Asignar al equipo de retención VIP
            - Llamada dentro de 24 horas
-        
         3. **💳 Incentivo de Pago**
            - Bono de $50 por cambio a pago automático
            - Facturación sin costos por 6 meses
-        
         4. **📊 Seguimiento**
            - Encuesta de satisfacción personalizada
            - Check-in mensual durante 3 meses
@@ -127,15 +128,12 @@ if submitted:
     else:
         st.markdown("""
         ### ✅ Plan de Mantenimiento
-        
         1. **🎁 Programa de Fidelidad**
            - Puntos por cada mes de permanencia
            - Descuentos en renovación
-        
         2. **📧 Comunicación Proactiva**
            - Newsletter mensual con tips
            - Ofertas exclusivas para clientes leales
-        
         3. **🆙 Upselling Suave**
            - Sugerir servicios complementarios
            - Promociones en bundles

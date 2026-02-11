@@ -1,4 +1,3 @@
-# streamlit_app/utils/charts.py
 import plotly.express as px
 import plotly.graph_objects as go
 from .colors import POSITIVO, NEGATIVO, PRINCIPAL, SECUNDARIO, TITULO

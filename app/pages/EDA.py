@@ -11,18 +11,11 @@ import plotly.graph_objects as go
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.colors import TITULO, POSITIVO, NEGATIVO, PRINCIPAL
 from utils.charts import create_histogram, create_churn_bar, create_pie_chart, create_avg_metric_bar
+from utils.load_data import load_data
 
 st.set_page_config(page_title="EDA - Telco", page_icon="📈", layout="wide")
 
-# Cargar datos
-@st.cache_data
-def load_data():
-    df = pd.read_csv("clean_data/telco-customer.csv")
-    if 'baja_binary' not in df.columns:
-        df['baja_binary'] = df['baja'].map({'Yes': 1, 'No': 0})
-    return df
-
-df = load_data()
+df = load_data("../clean_data/telco-customer.csv")
 
 # ========================================
 # CONTENIDO
@@ -60,7 +53,7 @@ with tab1:
     fig = create_histogram(
         df,
         var_num_col,
-        title=f"Distribución de {var_num_label} por Churn"
+        title=f"Distribución de {var_num_label} por baja"
     )
     st.plotly_chart(fig, use_container_width=True)
 

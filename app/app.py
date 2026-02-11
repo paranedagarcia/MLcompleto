@@ -18,33 +18,52 @@ st.set_page_config(
 # CUSTOM CSS
 # ========================================
 st.markdown(f"""
-    <style>
+<style>
+/* ===== Modo Claro ===== */
+body {{
+    background-color: #F8F9FA;
+    color: #0A2540;
+}}
+.main {{
+    background-color: #F8F9FA;
+}}
+.stMetric {{
+    background-color: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}}
+h1, h2, h3 {{
+    color: {TITULO};
+}}
+
+/* ===== Modo Oscuro ===== */
+@media (prefers-color-scheme: dark) {{
+    body {{
+        background-color: #0A2540;
+        color: white;
+    }}
     .main {{
-        background-color: #F8F9FA;
+        background-color: #0A2540;
     }}
     .stMetric {{
-        background-color: white;
-        padding: 15px;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        background-color: #1A1A1A;
+        color: white;
+        box-shadow: none;
     }}
     h1, h2, h3 {{
-        color: {TITULO};
-    }}
-    .stTabs [data-baseweb="tab-list"] {{
-        gap: 24px;
+        color: {POSITIVO};  /* Cambia a un color que contraste con fondo oscuro */
     }}
     .stTabs [data-baseweb="tab"] {{
-        background-color: white;
-        border-radius: 4px 4px 0 0;
-        padding: 10px 20px;
-        font-weight: 600;
+        background-color: #1A1A1A;
+        color: white;
     }}
     .stTabs [aria-selected="true"] {{
         background-color: {POSITIVO};
         color: white;
     }}
-    </style>
+}}
+</style>
 """, unsafe_allow_html=True)
 
 # ========================================
