@@ -1,8 +1,11 @@
-# streamlit_app/app.py
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from utils.colors import COLORES_TELCO, TITULO, POSITIVO, NEGATIVO
+import plotly.graph_objects as go
+from utils.charts import create_histogram, create_pie_chart, create_churn_bar, create_avg_metric_bar
+from utils.colors import TITULO, POSITIVO, THEME
+from utils.load_data import load_data
+from utils.footer import load_footer
 
 # ========================================
 # CONFIGURACIÓN DE LA PÁGINA
@@ -69,19 +72,11 @@ h1, h2, h3 {{
 # ========================================
 # CARGAR DATOS
 # ========================================
-@st.cache_data
-def load_data():
-    """Carga el dataset con caché para optimizar rendimiento"""
-    df = pd.read_csv("clean_data/telco-customer.csv")
-    # Asegurar que baja_binary existe
-    if 'baja_binary' not in df.columns and 'baja' in df.columns:
-        df['baja_binary'] = df['baja'].map({'Yes': 1, 'No': 0})
-    return df
 
 try:
-    df = load_data()
+    df = load_data("../clean_data/telco-customer.csv")
 except FileNotFoundError:
-    st.error("⚠️ No se encontró el archivo de datos. Por favor coloca 'telco-customer.csv' en la carpeta 'data/'")
+    st.error("⚠️ No se encontró el archivo de datos. Por favor coloca 'telco-customer.csv' en la carpeta 'clean_data/'")
     st.stop()
 
 # ========================================
@@ -120,7 +115,7 @@ col1, col2, col3, col4 = st.columns(4)
 with col1:
     churn_rate = (df['baja_binary'].sum() / len(df)) * 100
     st.metric(
-        "📉 Tasa de Churn",
+        "📉 Tasa de baja",
         f"{churn_rate:.1f}%",
         delta="-1.2%",
         delta_color="inverse"
@@ -129,7 +124,7 @@ with col1:
 with col2:
     arpu = df['monthlycharges'].mean()
     st.metric(
-        "💰 ARPU",
+        "💰 Pago mensual medio",
         f"${arpu:.2f}",
         delta="+$2.30"
     )
@@ -137,7 +132,7 @@ with col2:
 with col3:
     avg_tenure = df['tenure'].mean()
     st.metric(
-        "⏱️ Tenure Promedio",
+        "⏱️ Permanencia promedio",
         f"{avg_tenure:.0f} meses",
         delta="+3 meses"
     )
@@ -166,7 +161,7 @@ with tab1:
     with col1:
         st.markdown("#### 📋 Información del Dataset")
         st.dataframe({
-            "Métrica": ["Total de Clientes", "Variables", "Clientes con Churn", "% Churn"],
+            "Métrica": ["Total de Clientes", "Variables", "Clientes con baja", "% baja"],
             "Valor": [
                 f"{len(df):,}",
                 f"{len(df.columns)}",
@@ -177,48 +172,37 @@ with tab1:
     
     with col2:
         st.markdown("#### 🎯 Insights Clave")
-        st.success("✅ Clientes con contrato anual tienen **35% menos churn**")
-        st.warning("⚠️ 55% de clientes están en contrato mes-a-mes (alto riesgo)")
-        st.info("💡 Tenure > 18 meses reduce churn a menos del 10%")
+        st.success("✅ Clientes con contrato anual tienen **35% menos baja**")
+        st.warning("⚠️ 55% de clientes están en contrato mes-a-mes (alto riesgo de baja)")
+        st.info("💡 permanencia > 18 meses reduce baja a menos del 10%")
 
 with tab2:
-    st.subheader("📈 Distribución de Churn por Variables Clave")
+    st.subheader("📈 Distribución de baja por Variables Clave")
     
-    variable = st.selectbox(
+    # Diccionario: lo que se ve -> lo que existe en el CSV
+    var_map = {
+        "Tipo de contrato": "contract",
+        "Tipo de internet": "internetservice",
+        "Múltiples líneas de teléfono": "multiplelines",
+        "Método de pago": "paymentmethod"
+    }
+
+    # Selectbox mostrando nombres amigables
+    var_map_label = st.selectbox(
         "Selecciona variable para analizar:",
-        ["contract", "internetservice", "paymentmethod", "multiplelines"]
+        list(var_map.keys())
     )
     
-    # Gráfico de barras agrupadas
-    import plotly.graph_objects as go
-    churn_by_var = pd.crosstab(df[variable], df['baja_binary'])
+    churn_by_var = pd.crosstab(df[var_map[var_map_label]], df['baja_binary'])
     
-    fig = go.Figure()
-    fig.add_trace(go.Bar(
-        name='No Churn',
-        x=churn_by_var.index,
-        y=churn_by_var[0],
-        marker_color=POSITIVO
-    ))
-    fig.add_trace(go.Bar(
-        name='Churn',
-        x=churn_by_var.index,
-        y=churn_by_var[1],
-        marker_color=NEGATIVO
-    ))
-    
-    fig.update_layout(
-        barmode='group',
-        title=f"Distribución de Churn por {variable.replace('_', ' ').title()}",
-        xaxis_title=variable.replace('_', ' ').title(),
-        yaxis_title="Número de Clientes",
-        plot_bgcolor='white',
-        paper_bgcolor='white',
-        font=dict(color=TITULO),
-        height=400
+    fig = create_churn_bar(
+    df=df,
+    category_col=var_map[var_map_label],
+    title=f"Tasa de baja por {var_map_label}",
+    theme=THEME
     )
-    
     st.plotly_chart(fig, use_container_width=True)
+
 
 with tab3:
     st.subheader("🧭 Explora las Secciones de la App")
@@ -271,10 +255,4 @@ with tab3:
 # ========================================
 # FOOTER
 # ========================================
-st.markdown("---")
-st.markdown(f"""
-<div style='text-align: center; color: {TITULO};'>
-    <p><strong>📊 Telco Customer Analytics Dashboard</strong></p>
-    <p>Desarrollado con Streamlit | Datos actualizados: Febrero 2026</p>
-</div>
-""", unsafe_allow_html=True)
+load_footer()

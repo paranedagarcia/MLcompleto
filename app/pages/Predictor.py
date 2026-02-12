@@ -1,9 +1,10 @@
 import streamlit as st
 import pandas as pd
 import os
-from utils.colors import TITULO, POSITIVO, NEGATIVO
+from utils.colors import TITULO, POSITIVO, NEGATIVO, THEME
 from utils.charts import create_gauge_chart
-from utils.load_data import load_data  # ← función genérica que creamos
+from utils.load_data import load_data
+from utils.footer import load_footer
 
 st.set_page_config(page_title="Predictor - Telco", page_icon="🎯", layout="wide")
 
@@ -14,7 +15,8 @@ st.info("ℹ️ **Modelo ML utilizado**: XGBOOST")
 # =========================
 # 1️⃣ Cargar modelo
 # =========================
-model = load_data("../models/xgboost_model.pkl")  # ⚡ usa nuestra función genérica para cualquier archivo pkl
+# Carga los datos desde el metodo utils/load_data.py
+model = load_data("../models/xgboost_model.pkl")
 
 # =========================
 # 2️⃣ Formulario de entrada
@@ -62,7 +64,6 @@ if submitted:
         "streamingtv": streaming_tv
     }])
 
-    # ⚠️ IMPORTANTE: Aplicar exactamente el mismo preprocesamiento que el entrenamiento
     # Si el modelo fue entrenado con OneHotEncoder:
     input_encoded = pd.get_dummies(input_df)
 
@@ -82,7 +83,7 @@ if submitted:
     col1, col2 = st.columns([1, 1])
     
     with col1:
-        fig = create_gauge_chart(churn_prob)
+        fig = create_gauge_chart(churn_prob, theme=THEME)
         st.plotly_chart(fig, use_container_width=True)
     
     with col2:
@@ -138,3 +139,5 @@ if submitted:
            - Sugerir servicios complementarios
            - Promociones en bundles
         """)
+        
+load_footer()

@@ -1,7 +1,8 @@
-# streamlit_app/utils/colors.py
+import streamlit as st
 """
 Paleta de colores corporativa Telco
 """
+THEME = st.get_option("theme.base")  # "light" o "dark"
 
 COLORES_TELCO = {
     'azul_profundo': '#0A2540',
@@ -26,3 +27,29 @@ def get_color_map():
         0: POSITIVO,  # No Churn
         1: NEGATIVO   # Churn
     }
+    
+def get_color_by_baja_binary():
+    return {
+        'Alta': POSITIVO,
+        'Baja': NEGATIVO
+    }
+
+def get_color_by_labels(labels):
+    labels = list(labels)
+
+    palette = [
+        POSITIVO,
+        NEGATIVO,
+        FONDO,
+        PRINCIPAL,
+        SECUNDARIO,
+        TITULO
+    ]
+
+    # Si hay más categorías que colores, rota la paleta
+    color_map = {
+        label: palette[i % len(palette)]
+        for i, label in enumerate(labels)
+    }
+
+    return color_map

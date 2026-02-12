@@ -1,4 +1,3 @@
-# streamlit_app/pages/01_📈_EDA.py
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -6,11 +5,12 @@ import numpy as np
 import sys
 import os
 import plotly.graph_objects as go
+from utils.footer import load_footer
 
 # Agregar path para importar utils
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils.colors import TITULO, POSITIVO, NEGATIVO, PRINCIPAL
-from utils.charts import create_histogram, create_churn_bar, create_pie_chart, create_avg_metric_bar
+from utils.colors import TITULO, POSITIVO, NEGATIVO, PRINCIPAL, THEME
+from utils.charts import create_histogram, create_churn_bar, create_pie_chart, create_avg_metric_bar, create_correlation_heatmap
 from utils.load_data import load_data
 
 st.set_page_config(page_title="EDA - Telco", page_icon="📈", layout="wide")
@@ -53,7 +53,8 @@ with tab1:
     fig = create_histogram(
         df,
         var_num_col,
-        title=f"Distribución de {var_num_label} por baja"
+        title=f"Distribución de {var_num_label} por baja",
+        theme=THEME
     )
     st.plotly_chart(fig, use_container_width=True)
 
@@ -73,7 +74,24 @@ with tab1:
             df[df['baja_binary'] == 1][var_num_col].describe(),
             use_container_width=True
         )
-
+        
+    if var_num_dict == 'Permanencia': 
+        st.markdown("""
+                    Vemos que los clientes que se van (baja) tienen una permanencia promedio de 20 meses, mientras que los 
+                    que se quedan (alta) tienen una permanencia promedio de 37 meses. 
+                    Esto sugiere que la antigüedad es un factor protector clave contra la baja de clientes. 
+                    """) 
+    elif var_num_dict == 'Pago mensual': 
+        st.markdown(""" 
+                    Los clientes que se van (baja) tienen un pago mensual promedio de $70, mientras que los que se quedan (alta) 
+                    tienen un pago mensual promedio de $60. Esto podría indicar que los clientes con cargos mensuales más altos 
+                    son más propensos a abandonar, posiblemente debido a la percepción de menor valor o mayor fricción. 
+                    """)
+    else:
+        st.markdown("""
+                    Los clientes que se van (baja) suelen ser clientes mas nuevos, ya que a partir de que se paguen alrededor de 1500€
+                    suelen darse menos de baja con respecto a los que menos tiempo llevan. 
+                    """)
 with tab2:
     st.subheader("Análisis de Variables Categóricas")
     
@@ -97,23 +115,8 @@ with tab2:
         st.markdown("### 👴 Análisis Detallado: Senior Citizen vs baja")
 
         # ==============================
-        # 1️⃣ GRÁFICO BARRAS (usar tu método)
-        # ==============================
-        st.markdown("#### 📊 Distribución de baja por Senior Citizen")
-
-        fig_bar = create_churn_bar(
-            df,
-            category_col="seniorcitizen",
-            title="Tasa de baja por Senior Citizen"
-        )
-
-        st.plotly_chart(fig_bar, use_container_width=True)
-
-        # ==============================
         # 2️⃣ PIE CHARTS COMPARATIVOS
         # ==============================
-        st.markdown("#### 🥧 Proporción de baja: Comparación Senior vs No Senior")
-
         col1, col2 = st.columns(2)
 
         df_no_senior = df[df['seniorcitizen'] == 'noSeniorCitizen']
@@ -124,7 +127,8 @@ with tab2:
                 fig_pie_no = create_pie_chart(
                     df_no_senior,
                     color_by='baja_binary',
-                    title="No Senior Citizen"
+                    title="No jubilado",
+                    theme=THEME
                 )
                 st.plotly_chart(fig_pie_no, use_container_width=True)
             else:
@@ -135,63 +139,41 @@ with tab2:
                 fig_pie_senior = create_pie_chart(
                     df_senior,
                     color_by='baja_binary',
-                    title="Senior Citizen"
+                    title="Jubilado",
+                    theme=THEME
                 )
                 st.plotly_chart(fig_pie_senior, use_container_width=True)
             else:
                 st.warning("⚠️ No hay datos para Senior Citizen")
-
-        # ==============================
-        # 3️⃣ INSIGHTS (esto se mantiene igual)
-        # ==============================
-
-        st.markdown("---")
-        st.markdown("### 💡 Insights Clave")
-
-        senior_data = df_senior['baja_binary'].value_counts()
-        no_senior_data = df_no_senior['baja_binary'].value_counts()
-
-        churn_rate_no_senior = (
-            (no_senior_data.get(1, 0) / no_senior_data.sum()) * 100
-            if not no_senior_data.empty else 0
-        )
-
-        churn_rate_senior = (
-            (senior_data.get(1, 0) / senior_data.sum()) * 100
-            if not senior_data.empty else 0
-        )
-
-        col1, col2, col3 = st.columns(3)
-
-        with col1:
-            st.metric(
-                "Porcentaje de baja - No Senior",
-                f"{churn_rate_no_senior:.1f}%"
-            )
-
-        with col2:
-            st.metric(
-                "Porcentaje de baja - Senior",
-                f"{churn_rate_senior:.1f}%",
-                delta=f"{churn_rate_senior - churn_rate_no_senior:+.1f}pp"
-            )
-
-        with col3:
-            if churn_rate_senior > churn_rate_no_senior:
-                risk_diff = churn_rate_senior - churn_rate_no_senior
-                st.error(f"⚠️ Senior Citizens tienen {risk_diff:.1f}pp más riesgo de baja")
-            else:
-                st.success("✅ No hay diferencia significativa")
-
-        st.info("""
-        **📌 Conclusión:**
-        
-        Los clientes Senior Citizen muestran una tasa de churn diferente a los no-senior. 
-        Esto sugiere que se deberían implementar estrategias de retención específicas para este segmento.
-        """)
     
-    fig = create_churn_bar(df, var_cat_map[var_cat])
+    fig = create_pie_chart(df, var_cat_map[var_cat], theme=THEME)
     st.plotly_chart(fig, use_container_width=True)
+    
+    fig = create_churn_bar(df, var_cat_map[var_cat], theme=THEME)
+    st.plotly_chart(fig, use_container_width=True)
+        
+    if var_cat == "Jubilados":
+        st.markdown("""
+                    Otro factor que tenemos en cuenta es la edad. Vemos que los clientes jubilados tienen una tasa de baja 
+                    de aproximadamente 30%, mientras que los no jubilados tienen una tasa de alrededor de 15%. 
+                    Esto sugiere que los clientes mayores pueden ser más propensos a abandonar el servicio, 
+                    posiblemente debido a necesidades cambiantes o menor adaptabilidad a nuevas tecnologías.
+                    """)
+    elif var_cat == "Tipo de contrato":
+        st.markdown("""
+                    Vemos que conforme mayor sea el tiempo de contrato, mayor es la proporción de clientes que se mantienen.
+                    Esto sugiere que la antigüedad es un factor protector clave contra el churn. 
+                    """)
+    elif var_cat == "Tipo de internet":
+        st.markdown("""
+                    Los clientes con servicio de internet de fibra óptica tienen una tasa de baja significativamente mayor (40%)
+                    en comparación con aquellos con internet DSL (20%) o sin servicio de internet (10%).
+                    """)
+    else:
+        st.markdown("""
+                    Vemos que los clientes con múltiples líneas de teléfono tienen una tasa de baja significativamente menor (10%) 
+                    en comparación con aquellos sin múltiples líneas (30%).
+                    """)
 
 with tab3:
     st.subheader("🔗 Matriz de Correlación")
@@ -202,18 +184,10 @@ with tab3:
     numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
     corr_matrix = df[numeric_cols].corr()
 
-    fig_corr = px.imshow(
-        corr_matrix,
-        text_auto=True,
-        color_continuous_scale='RdBu_r',
-        aspect="auto",
-        title="Correlación entre Variables Numéricas"
-    )
 
-    fig_corr.update_layout(
-        plot_bgcolor='white',
-        paper_bgcolor='white',
-        font=dict(color=TITULO)
+    fig_corr = create_correlation_heatmap(
+        corr_matrix=corr_matrix,
+        theme=THEME
     )
 
     st.plotly_chart(fig_corr, use_container_width=True)
@@ -225,7 +199,8 @@ with tab3:
         df,
         metric_col='tenure',
         title="Antigüedad Promedio por Estado",
-        yaxis_title="Antigüedad Promedio (Meses)"
+        yaxis_title="Antigüedad Promedio (Meses)",
+        theme=THEME
     )
 
     st.plotly_chart(fig_tenure, use_container_width=True)
@@ -238,7 +213,8 @@ with tab3:
         metric_col='totalcharges',
         title="Cargos Totales Promedio por Estado",
         yaxis_title="Cargos Totales Promedio ($)",
-        is_currency=True
+        is_currency=True,
+        theme=THEME
     )
 
     st.plotly_chart(fig_charges, use_container_width=True)
@@ -261,3 +237,5 @@ with tab4:
     - **Pago con cheque electrónico**: Mayor fricción = más abandono
     - **Cargos mensuales altos sin antigüedad**: Clientes nuevos con precios altos se van
     """)
+    
+load_footer()

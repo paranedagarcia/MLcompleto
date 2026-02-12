@@ -3,7 +3,6 @@ import pandas as pd
 import os
 from typing import Callable, Optional
 
-
 @st.cache_data
 def load_data(
     relative_path: str,
