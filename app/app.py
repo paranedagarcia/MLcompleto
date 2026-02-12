@@ -93,10 +93,9 @@ with st.sidebar:
     Dashboard interactivo para análisis de churn en Telco.
     
     **Características:**
-    - 📈 Análisis Exploratorio Completo
-    - 🎯 Predictor de Churn ML
-    - 💡 Recomendaciones Estratégicas
     - 📊 Dashboard Ejecutivo
+    - 📈 EDA
+    - 🎯 Predictor de baja ML
     
     ---
     **Datos:** 7,043 clientes  
@@ -106,7 +105,7 @@ with st.sidebar:
 # ========================================
 # PÁGINA PRINCIPAL
 # ========================================
-st.title("🚀 Telco Customer Churn Analytics")
+st.title("🚀 Telco Customer análisis de baja")
 st.markdown("### Plataforma de Análisis Predictivo y Retención de Clientes")
 
 # KPIs principales
@@ -151,7 +150,7 @@ st.markdown("---")
 # ========================================
 # TABS PRINCIPALES
 # ========================================
-tab1, tab2, tab3 = st.tabs(["📊 Vista General", "📈 Análisis Rápido", "🎯 Navegación"])
+tab1, tab2 = st.tabs(["📊 Vista General", "🎯 Navegación"])
 
 with tab1:
     st.subheader("📊 Resumen Ejecutivo del Dataset")
@@ -177,34 +176,6 @@ with tab1:
         st.info("💡 permanencia > 18 meses reduce baja a menos del 10%")
 
 with tab2:
-    st.subheader("📈 Distribución de baja por Variables Clave")
-    
-    # Diccionario: lo que se ve -> lo que existe en el CSV
-    var_map = {
-        "Tipo de contrato": "contract",
-        "Tipo de internet": "internetservice",
-        "Múltiples líneas de teléfono": "multiplelines",
-        "Método de pago": "paymentmethod"
-    }
-
-    # Selectbox mostrando nombres amigables
-    var_map_label = st.selectbox(
-        "Selecciona variable para analizar:",
-        list(var_map.keys())
-    )
-    
-    churn_by_var = pd.crosstab(df[var_map[var_map_label]], df['baja_binary'])
-    
-    fig = create_churn_bar(
-    df=df,
-    category_col=var_map[var_map_label],
-    title=f"Tasa de baja por {var_map_label}",
-    theme=THEME
-    )
-    st.plotly_chart(fig, use_container_width=True)
-
-
-with tab3:
     st.subheader("🧭 Explora las Secciones de la App")
     
     col1, col2 = st.columns(2)
@@ -212,10 +183,9 @@ with tab3:
     with col1:
         st.markdown("""
         ### 📈 Análisis Exploratorio (EDA)
-        - Distribución de variables numéricas
+        - Análisis de variables numéricas
         - Análisis de variables categóricas
         - Matrices de correlación
-        - Detección de outliers
         - Insights accionables
         
         👉 **Navega desde el menú lateral**
@@ -232,16 +202,6 @@ with tab3:
         """)
     
     with col2:
-        st.markdown("""
-        ### 💡 Recomendaciones Estratégicas
-        - Roadmap de implementación
-        - Simulador de impacto financiero
-        - Estrategias de retención
-        - ROI estimado
-        
-        👉 **Navega desde el menú lateral**
-        """)
-        
         st.markdown("""
         ### 📊 Dashboard Ejecutivo
         - KPIs en tiempo real
