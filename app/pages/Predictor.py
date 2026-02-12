@@ -3,7 +3,7 @@ import pandas as pd
 import os
 from utils.colors import TITULO, POSITIVO, NEGATIVO, THEME
 from utils.charts import create_gauge_chart
-from utils.load_data import load_data
+from utils.load_data import cargar_sidebar, load_data
 from utils.footer import load_footer
 
 st.set_page_config(page_title="Predictor - Telco", page_icon="🎯", layout="wide")
@@ -17,6 +17,8 @@ st.info("ℹ️ **Modelo ML utilizado**: XGBOOST")
 # =========================
 # Carga los datos desde el metodo utils/load_data.py
 model = load_data("../models/xgboost_model.pkl")
+
+cargar_sidebar()   
 
 # =========================
 # 2️⃣ Formulario de entrada

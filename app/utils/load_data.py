@@ -1,7 +1,9 @@
+from click import Path
 import streamlit as st
 import pandas as pd
 import os
 from typing import Callable, Optional
+from pathlib import Path
 
 @st.cache_data
 def load_data(
@@ -47,3 +49,29 @@ def load_data(
         df = transform_func(df)
 
     return df
+
+def cargar_logo():
+    current_dir = Path(__file__).parent
+    logo_path = current_dir.parent / "assets" / "logo.png"
+    return logo_path
+
+def cargar_sidebar():
+    with st.sidebar:
+        st.image(cargar_logo(), use_container_width=True)
+        st.title("📊 Navegación")
+        st.markdown("---")
+        
+        st.markdown("""
+        ### Acerca de esta App
+        
+        Dashboard interactivo para análisis de churn en Telco.
+        
+        **Características:**
+        - 📊 Dashboard Ejecutivo
+        - 📈 EDA
+        - 🎯 Predictor de baja ML
+        
+        ---
+        **Datos:** 7,043 clientes  
+        **Actualización:** Feb 2026
+        """)

@@ -4,7 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from utils.charts import create_histogram, create_pie_chart, create_churn_bar, create_avg_metric_bar
 from utils.colors import TITULO, POSITIVO, THEME
-from utils.load_data import load_data
+from utils.load_data import load_data, cargar_sidebar
 from utils.footer import load_footer
 
 # ========================================
@@ -82,25 +82,8 @@ except FileNotFoundError:
 # ========================================
 # SIDEBAR
 # ========================================
-with st.sidebar:
-    st.image("https://via.placeholder.com/200x80/0A2540/FFFFFF?text=TELCO", use_container_width=True)
-    st.title("📊 Navegación")
-    st.markdown("---")
-    
-    st.markdown("""
-    ### Acerca de esta App
-    
-    Dashboard interactivo para análisis de churn en Telco.
-    
-    **Características:**
-    - 📊 Dashboard Ejecutivo
-    - 📈 EDA
-    - 🎯 Predictor de baja ML
-    
-    ---
-    **Datos:** 7,043 clientes  
-    **Actualización:** Feb 2026
-    """)
+
+cargar_sidebar()
 
 # ========================================
 # PÁGINA PRINCIPAL

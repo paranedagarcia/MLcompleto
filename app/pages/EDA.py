@@ -6,16 +6,18 @@ import sys
 import os
 import plotly.graph_objects as go
 from utils.footer import load_footer
+from utils.load_data import cargar_sidebar, load_data, cargar_logo
 
 # Agregar path para importar utils
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.colors import TITULO, POSITIVO, NEGATIVO, PRINCIPAL, THEME
 from utils.charts import create_histogram, create_churn_bar, create_pie_chart, create_avg_metric_bar, create_correlation_heatmap
-from utils.load_data import load_data
 
 st.set_page_config(page_title="EDA - Telco", page_icon="📈", layout="wide")
 
 df = load_data("../clean_data/telco-customer.csv")
+
+cargar_sidebar()
 
 # ========================================
 # CONTENIDO
