@@ -2,7 +2,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 
-from utils.load_data import load_data
+from utils.load_data import load_data, cargar_logo
 from utils.footer import load_footer
 from utils.colors import THEME
 from utils.charts import (
@@ -44,7 +44,11 @@ def select_todos(df, col, label):
 # =========================
 # BARRA LATERAL
 # =========================
+
+st.sidebar.image(cargar_logo(), use_container_width=True)
+
 st.sidebar.title("🔎 Filtros")
+st.sidebar.markdown("---")
 
 df_f = df.copy()
 df_f = select_todos(df_f, "contract", "Tipo de contrato")
@@ -75,6 +79,7 @@ with st.sidebar.expander("🎚️ Filtros por rango"):
 if df_f.empty:
     st.warning("No hay datos con los filtros seleccionados.")
     st.stop()
+    
 
 # =========================
 # MÉTRICAS PRINCIPALES
