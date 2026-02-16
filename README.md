@@ -201,7 +201,7 @@ La app permite:
 
 ### Clonar el repositorio
 ```
-git clone https://github.com/Bootcamp-Data-Analyst/Proyecto-8-Problema-de-clasificacion-Grupo-3.git
+git clone https://github.com/PabloRodMu/Problema-de-clasificacion.git
 ```
 ### Crear entorno virtual
 ```bash
