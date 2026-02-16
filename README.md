@@ -200,7 +200,10 @@ La app permite:
 # ⚙️ Instalación Local
 
 ## Opción 1: Entorno Virtual (Recomendado)
-
+### Clonar el repositorio
+```
+git clone https://github.com/Bootcamp-Data-Analyst/Proyecto-8-Problema-de-clasificacion-Grupo-3.git
+```
 ### Crear entorno
 ```bash
 python -m venv venv
