@@ -6,7 +6,7 @@
     https://proyecto-8-problema-de-clasificacion-eaty.onrender.com/
   </a>
 </p>
-
+https://github.com/PabloRodMu/Problema-de-clasificacion
 ---
 
 Proyecto de Machine Learning para predicción de baja en clientes Telco.
